@@ -2,7 +2,7 @@ __author__ = 'andra'
 import os
 import pprint
 
-if '' in os.environ:
-   print(os.environ['BLABLA'])
+if 'WD_API' in os.environ:
+   print(os.environ['WD_API'])
 
-pprint.pprint(os.environ)
+# pprint.pprint(os.environ)
