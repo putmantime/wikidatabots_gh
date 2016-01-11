@@ -5,4 +5,4 @@ import pprint
 if 'WD_API' in os.environ:
    print(os.environ['WD_API'])
 
-# pprint.pprint(os.environ)
+pprint.pprint(os.environ)
