@@ -52,6 +52,7 @@ class diseaseOntology():
         self.start = time.time()
         self.content = ET.fromstring(self.download_disease_ontology())
         # self.logincreds = PBB_login.WDLogin(PBB_settings.getWikiDataUser(), PBB_settings.getWikiDataPassword())
+        self.logincreds = PBB_login.WDLogin(PBB_settings.getWikiDataUser(), os.environ['WD_API'])
         self.updateDiseaseOntologyVersion()
 
         # Get all WikiData entries that contain a WikiData ID
