@@ -26,7 +26,7 @@ import traceback
 import os
 
 
-if 'wikidata_password' not in os.environ:
+if 'WD_API' not in os.environ:
    raise ValueError('The password for the api of Wikidata is not set')
 
 try:
