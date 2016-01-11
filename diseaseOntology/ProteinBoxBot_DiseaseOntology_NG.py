@@ -23,7 +23,11 @@ along with ProteinBoxBot.  If not, see <http://www.gnu.org/licenses/>.
 # Resource specific 
 import DiseaseOntology
 import traceback
+import os
 
+
+if 'wikidata_password' not in os.environ:
+   raise ValueError('The password for the api of Wikidata is not set')
 
 try:
     print("Getting the Disease Ontology")
