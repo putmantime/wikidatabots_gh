@@ -28,7 +28,7 @@ import time
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../ProteinBoxBot_Core")
-import PBB_login
+import ProteinBoxBot_Core.PBB_Core as PBB_login
 import PBB_settings
 import PBB_Core
 import PBB_Debug
@@ -217,11 +217,12 @@ class  disease(object):
         do_reference = [refImported, refRetrieved, refStatedIn]
 
         prep = dict()
-        prep["P279"] = [PBB_Core.WDItemID(value='Q12136', prop_nr='P279', references=[copy.deepcopy(do_reference)], rank=self.rank)]
+        if self.do_id != "DOID:4":
+            prep["P279"] = [PBB_Core.WDItemID(value='Q12136', prop_nr='P279', references=[copy.deepcopy(do_reference)], rank=self.rank)]
         # Subclass of disease
-        for subclass in self.subclasses:
-            if subclass in self.wd_doMappings.keys():
-                prep["P279"].append(PBB_Core.WDItemID(value=self.wd_doMappings[subclass], prop_nr='P279', references=[copy.deepcopy(do_reference)], rank=self.rank))
+            for subclass in self.subclasses:
+                if subclass in self.wd_doMappings.keys():
+                    prep["P279"].append(PBB_Core.WDItemID(value=self.wd_doMappings[subclass], prop_nr='P279', references=[copy.deepcopy(do_reference)], rank=self.rank))
 
 
         if "Orphanet" in self.xrefs.keys():
