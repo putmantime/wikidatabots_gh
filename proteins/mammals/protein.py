@@ -24,6 +24,14 @@ along with ProteinBoxBot.  If not, see <http://www.gnu.org/licenses/>.
 __author__ = 'Andra Waagmeester and Jasper Koehorst'
 __license__ = 'GPL'
 
+import sys, os
+
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../ProteinBoxBot_Core/")
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
+
+print (sys.path)
+
 import ProteinBoxBot_Core.PBB_Core as PBB_Core
 import ProteinBoxBot_Core.PBB_Debug as PBB_Debug
 import ProteinBoxBot_Core.PBB_login as PBB_login
@@ -33,28 +41,43 @@ import traceback
 from time import gmtime, strftime
 import time
 import pprint
+import urllib.parse
+
+global uniprot
+uniprotURL = "http://sparql.uniprot.org/sparql/?query="
 
 try:
     import simplejson as json
 except ImportError as e:
     import json
 
+#######SPARQL function########################
+def SPARQL(url, query, rformat):
+    print ("Initialising SPARQL")
+    prefixes = open("./resources/queries/prefixes").read()
+    query = prefixes + query
+    if rformat == "JSON":
+        sparql = SPARQLWrapper(url)
+        sparql.setQuery(prefixes+"\n"+query)
+        sparql.setReturnFormat(JSON)
+        results = sparql.query().convert()
+        return results
+    else:
+        query = url + urllib.parse.quote_plus(query)
+        result = requests.get(query + "&format="+rformat)
+        results = result.json()
+        return results
+#############################################
 
 class Proteins(object):
     def __init__(self, object):
         print("Getting all human proteins from Uniprot...")
-        r0 = requests.get(
-            'http://sparql.uniprot.org/sparql?query='
-            'PREFIX+up%3a%3chttp%3a%2f%2fpurl.uniprot.org%2fcore%2f%3e+%0d%0a'
-            'PREFIX+taxonomy%3a+%3chttp%3a%2f%2fpurl.uniprot.org%2ftaxonomy%2f%3e%0d%0a'
-            'PREFIX+xsd%3a+%3chttp%3a%2f%2fwww.w3.org%2f2001%2fXMLSchema%23%3e%0d%0a'
-            'SELECT+DISTINCT+*%0d%0aWHERE%0d%0a%7b%0d%0a%09%09%3fprotein+a+up%3aProtein+.'
-            '%0d%0a++++++++%3fprotein+up%3areviewed+%22true%22%5e%5exsd%3aboolean+.'
-            '%0d%0a++%09%09%3fprotein+rdfs%3alabel+%3fprotein_label+.'
-            '%0d%0a++++++++%3fprotein+up%3aorganism+taxonomy%3a9606+.'
-            '%0d%0a%7d&format=srj')
+        #Obtaining the right query
+        query = open("resources/queries/humanProteins").read()
+      
+        #Perform the sparql query, if JSON sparqlwrapper is used otherwise, requests.get()
+        prot_results = SPARQL(uniprotURL, query, "srj")
 
-        prot_results = r0.json()
         self.uniprot_ids = []
         for protein in prot_results["results"]["bindings"]:
             item = dict()
@@ -64,66 +87,23 @@ class Proteins(object):
 
 class Uniprot_Record(object):
     def __init__(self, object):
-        r = requests.get(
-            "http://sparql.uniprot.org/sparql?query="
-            "PREFIX+up%3a%3chttp%3a%2f%2fpurl.uniprot.org%2fcore%2f%3e%0d%0a"
-            "PREFIX+skos%3a%3chttp%3a%2f%2fwww.w3.org%2f2004%2f02%2fskos%2fcore%23%3e%0d%0a"
-            "PREFIX+taxonomy%3a%3chttp%3a%2f%2fpurl.uniprot.org%2ftaxonomy%2f%3e%0d%0a"
-            "PREFIX+database%3a%3chttp%3a%2f%2fpurl.uniprot.org%2fdatabase%2f%3e%0d%0a"
-            "SELECT+%3funiprot+%3fplabel+%3fecName+%3fupversion+%0d%0a+++++++"
-            "(group_concat(distinct+%3fencodedBy%3b+separator%3d%22%3b+%22)+as+%3fencoded_by)%0d%0a+++++++"
-            "(group_concat(distinct+%3fncbiGene%3b+separator%3d%22%3b+%22)+as+%3fgene_id)%0d%0a+++++++"
-            "(group_concat(distinct+%3falias%3b+separator%3d%22%3b+%22)+as+%3fupalias)%0d%0a+++++++"
-            "(group_concat(distinct+%3fpdb%3b+separator%3d%22%3b+%22)+as+%3fpdbid)%0d%0a+++++++"
-            "(group_concat(distinct+%3frefseq%3b+separator%3d%22%3b+%22)+as+%3frefseqid)%0d%0a+++++++"
-            "(group_concat(distinct+%3fensP%3b+separator%3d%22%3b+%22)+as+%3fensemblp)%0d%0aWHERE%0d%0a%7b%0d%0a%09%09"
-            "VALUES+%3funiprot+%7b%3chttp%3a%2f%2fpurl.uniprot.org%2funiprot%2f" +
-                    str(up["id"]) +
-            "%3e%7d%0d%0a++++++++%3funiprot+rdfs%3alabel+%3fplabel+."
-            "%0d%0a++++++++%3funiprot+up%3aversion+%3fupversion+."
-            "+%0d%0a++++++++%3funiprot+up%3aencodedBy+%3fgene+."
-            "%0d%0a%09++++%3fgene+skos%3aprefLabel+%3fencodedBy+."
-            "%0d%0a++++++++optional%7b%3funiprot+up%3aalternativeName+%3fupAlias+."
-            "%0d%0a++++++++%3fupAlias+up%3aecName+%3fecName+."
-            "%7d%0d%0a++++++++optional%7b%3funiprot+rdfs%3aseeAlso+%3fncbiGene+."
-            "%0d%0a++++++++%3fncbiGene+up%3adatabase+database%3aGeneID+."
-            "%7d%0d%0a++++++++%0d%0a++++++++"
-            "OPTIONAL%7b+%3funiprot+up%3aalternativeName+%3fupAlias+."
-            "%0d%0a++++++++++%7b%3fupAlias+up%3afullName+%3falias+."
-            "%7d+UNION%0d%0a++++++++%7b%3fupAlias+up%3ashortName+%3falias+."
-            "%7d%7d%0d%0a++++++++%3funiprot+up%3aversion+%3fupversion+."
-            "%0d%0a++++++++"
-            "OPTIONAL%7b%3funiprot+rdfs%3aseeAlso+%3fpdb+."
-            "%0d%0a++++++++%3fpdb+up%3adatabase+database%3aPDB+."
-            "%7d%0d%0a++++++++OPTIONAL%7b%3funiprot+rdfs%3aseeAlso+%3frefseq+."
-            "%0d%0a++++++++%3frefseq+up%3adatabase+database%3aRefSeq+."
-            "%7d++%0d%0a++++++++OPTIONAL%7b%3funiprot+rdfs%3aseeAlso+%3fensT+."
-            "%0d%0a++++++++%3fensT+up%3adatabase+database%3aEnsembl+."
-            "%0d%0a++++++++%3fensT+up%3atranslatedTo+%3fensP+."
-            "%7d%0d%0a%7d%0d%0agroup+by+%3fupAlias+%3funiprot+%3fencodedBy+%3fplabel+%3fecName+%3fupversion&format=srj")
-
-        self.protein = r.json()
+        #Contains a $1 variable in the query which can be replaced by a uri / string / int etc of interest
+        print (object["id"])
+        query = open("resources/queries/uniprotInformation").read()
+        query = query.replace("$1",object["id"])
+        print (query)
+        print ("Getting Uniprot records for a given protein")
+        self.protein = SPARQL(uniprotURL, query,"srj")
+        print(self.protein)
         if len(self.protein["results"]["bindings"]) == 0:
             raise Exception("Communication error on " + object)
 
 class Go_Annotations_Uniprot(object):
-    def __init__(self):
-        r2 = requests.get(
-            "http://sparql.uniprot.org/sparql?query="
-            "PREFIX+up%3a%3chttp%3a%2f%2fpurl.uniprot.org%2fcore%2f%3e+%0d%0a"
-            "PREFIX+skos%3a%3chttp%3a%2f%2fwww.w3.org%2f2004%2f02%2fskos%2fcore%23%3e+%0d%0a"
-            "SELECT+DISTINCT+%3fprotein+%3fgo+%3fgoLabel+%3fparentLabel%0d%0a"
-            "WHERE%0d%0a%7b%0d%0a++%09%09VALUES+%3f"
-            "protein+%7b%3chttp%3a%2f%2fpurl.uniprot.org%2funiprot%2f" +
-            str(up["id"]) +
-            "%3e%7d%0d%0a%09%09%3fprotein+a+up%3aProtein+."
-            "%0d%0a++%09%09%3fprotein+up%3aclassifiedWith+%3fgo+."
-            "+++%0d%0a++++++++%3fgo+rdfs%3alabel+%3fgoLabel+."
-            "%0d%0a++++++++%3fgo+rdfs%3asubClassOf*+%3fparent+."
-            "%0d%0a++++++++%3fparent+rdfs%3alabel+%3fparentLabel+."
-            "%0d%0a++++++++optional+%7b%3fparent+rdfs%3asubClassOf+%3fgrandParent+."
-            "%7d%0d%0a++++++++FILTER+(!bound(%3fgrandParent))%0d%0a%7d&format=srj")
-        self.go_terms = r2.json()
+    #Jasper: Not sure here... was (self):
+    def __init__(self, object):
+        query = open("resources/queries/GOTerms").read()
+        query = query.replace("$1",object["id"])
+        self.go_terms = SPARQL(uniprotURL,query,"srj")
 
 
 class HumanProteome:
@@ -132,7 +112,7 @@ class HumanProteome:
         self.logincreds = PBB_login.WDLogin(PBB_settings.getWikiDataUser(), PBB_settings.getWikiDataPassword())
         uniprotwikidataids = dict()
         genesymbolwdmapping = dict()
-
+        
         print('Getting all proteins with a uniprot ID in Wikidata...')
         inwikidata = PBB_Core.WDItemList("CLAIM[703:5] AND CLAIM[352]", "352")
         for proteinItem in inwikidata.wditems["props"]["352"]:
@@ -150,8 +130,10 @@ class HumanProteome:
         '''
         for geneItem in InWikiData.wditems["props"]["351"]:
             entrez_wikidata_ids[str(geneItem[2])] = geneItem[0]
+        #Jasper: Proteins needs an object, is that self?
 
-        for up in Proteins():
+        for up in Proteins(self).uniprot_ids:
+            print ("UP",up)
             try:
                 protein_instance = Uniprot_Record(up)
                 protein_instance["goTerms"] = Go_Annotations_Uniprot(up)
@@ -341,7 +323,7 @@ class HumanProtein(object):
 
         self.wd_json_representation = wdProteinpage.get_wd_json_representation()
         # PBB_Debug.prettyPrint(self.wd_json_representation)
-        wdProteinpage.write(self.logincreds)
+        #wdProteinpage.write(self.logincreds)
         print(wdProteinpage.wd_item_id)
 
         PBB_Core.WDItemEngine.log('INFO', '{main_data_id}, "{exception_type}", "{message}", {wd_id}, {duration}'.format(

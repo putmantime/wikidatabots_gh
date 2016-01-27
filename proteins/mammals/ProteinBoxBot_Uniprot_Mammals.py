@@ -20,6 +20,11 @@ You should have received a copy of the GNU General Public License
 along with ProteinBoxBot.  If not, see <http://www.gnu.org/licenses/>.
 '''
 # Load the path to the PBB_Core library
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../ProteinBoxBot_Core")
+
+print (sys.path.append)
 
 import ProteinBoxBot_Core.PBB_Core as PBB_Core
 
@@ -32,7 +37,8 @@ from datetime import date, datetime, timedelta
 try:
     print("Getting human proteins from uniprot")
     proteome = protein.HumanProteome()
-    print(proteome.protein_count)
+    #Not sure what you want to achieve here?
+    #print(proteome.protein_count)
 
 except Exception as err:
     print(traceback.format_exc())
