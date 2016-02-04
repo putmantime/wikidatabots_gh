@@ -28,10 +28,10 @@ import time
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../ProteinBoxBot_Core")
-import ProteinBoxBot_Core.PBB_Core as PBB_login
-import PBB_settings
-import PBB_Core
-import PBB_Debug
+import ProteinBoxBot_Core.PBB_login as PBB_login
+import ProteinBoxBot_Core.PBB_settings as PBB_settings
+import ProteinBoxBot_Core.PBB_Core as PBB_Core
+import ProteinBoxBot_Core.PBB_Debug as PBB_Debug
 import xml.etree.cElementTree as ET
 import sys
 import DiseaseOntology_settings
@@ -108,47 +108,6 @@ class diseaseOntology():
         r = requests.get(DiseaseOntology_settings.getdoUrl())
         return r.text
 
-    '''
-    def updateDiseaseOntologyVersion(self):   
-        diseaseOntology = self.content   
-        namespaces = {'owl': 'http://www.w3.org/2002/07/owl#', 'rdfs': 'http://www.w3.org/2000/01/rdf-schema#', 'oboInOwl': 'http://www.geneontology.org/formats/oboInOwl#', 'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'}
-        doDate =  diseaseOntology.findall('.//oboInOwl:date', namespaces)
-        doversion = diseaseOntology.findall('.//owl:versionIRI', namespaces)      
-        for name, value in doversion[0].items():
-                    doUrlversion = value
-        dateList = doDate[0].text.split(' ')[0].split(":")
-        searchTerm = "Disease ontology release "+dateList[2]+"-"+dateList[1]+"-"+dateList[0]
-
-        url = 'https://www.wikidata.org/w/api.php'
-        params = {
-            'action': 'wbsearchentities',
-            'format' : 'json' , 
-            'language' : 'en', 
-            'type' : 'item', 
-            'search': searchTerm
-        }
-        data = requests.get(url, params=params)
-        reply = json.loads(data.text, "utf-8")     
-        #PBB_Debug.prettyPrint(reply)
-        self.doVersionID = None
-        if len(reply['search']) == 0:
-               data2add = []
-               # official website
-               data2add.append(PBB_Core.WDUrl(value="http://disease-ontology.org", prop_nr = "P856"))
-               # archive URL
-               githubURL = "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/master/releases/"+dateList[2]+"-"+dateList[1]+"-"+dateList[0]+"/doid.owl"
-               data2add.append(PBB_Core.WDUrl(value=githubURL, prop_nr = "P1065"))
-               doVersionWD = PBB_Core.WDItemEngine(item_name=searchTerm, data=data2add, server="www.wikidata.org", domain="disease")
-               doVersionPage.set_description(description='Release of the Disease ontology', lang='en')
-               PBB_Debug.prettyPrint(doVersionPage.get_wd_json_representation())
-               self.doVersionID = doVersionPage.write(self.logincreds)
-               print("WikiData entry made for this version of Disease Ontology: "+self.doVersionID)
-        else:
-            self.doVersionID = reply['search'][0]['id']
-        print(self.doVersionID)
-        '''
-
-        
 class  disease(object):
     def __init__(self, object):
         """
@@ -245,8 +204,8 @@ class  disease(object):
                     else:
                         wikilink = None
             else:
-                if "//en.wikipedia.org/wiki/" in xrefs["url"]:
-                    wikilink = xrefs["url"].replace("//en.wikipedia.org/wiki/", "").replace("_", "")
+                if "//en.wikipedia.org/wiki/" in self.xrefs["url"]:
+                    wikilink = self.xrefs["url"].replace("//en.wikipedia.org/wiki/", "").replace("_", "")
                 else:
                     wikilink = None
         else:
@@ -292,6 +251,15 @@ class  disease(object):
             else:
                 prep["P492"] = [PBB_Core.WDString(value=self.xrefs["OMIM"], prop_nr='P492', references=[copy.deepcopy(do_reference)], rank=self.rank)]
 
+        # add equivalent classes
+        prep["P1709"] = [PBB_Core.WDUrl(value="http://purl.obolibrary.org/obo/"+self.do_id.replace(":", "_"), prop_nr='P1709', references=[copy.deepcopy(do_reference)], rank=self.rank)]
+
+        refStatedIn = PBB_Core.WDUrl(value="http://www.ebi.ac.uk/miriam/main/collections/MIR:00000233", prop_nr='P854', is_reference=True)
+        refStatedIn.overwrite_references = True
+
+        io_reference = [refStatedIn]
+        prep["P1709"].append(PBB_Core.WDUrl(value="http://identifiers.org/doid/"+self.do_id, prop_nr='P1709', references=[copy.deepcopy(io_reference)], rank=self.rank))
+
         print(self.wdid)
         data2add = []
         for key in prep.keys():
@@ -299,10 +267,10 @@ class  disease(object):
                 data2add.append(statement)
                 print(statement.prop_nr, statement.value)
 
-        if self.wdid is not None:
-            wdPage = PBB_Core.WDItemEngine(self.wdid, item_name=self.name, data=data2add, server="www.wikidata.org", domain="diseases",append_value=['P279'])
-        else:
-            wdPage = PBB_Core.WDItemEngine(item_name=self.name, data=data2add, server="www.wikidata.org", domain="diseases", append_value=['P279'])
+        #if self.wdid is not None:
+        #    wdPage = PBB_Core.WDItemEngine(self.wdid, item_name=self.name, data=data2add, server="www.wikidata.org", domain="diseases",append_value=['P279'])
+        #else:
+        wdPage = PBB_Core.WDItemEngine(item_name=self.name, data=data2add, server="www.wikidata.org", domain="diseases", append_value=['P279'])
 
         # wdPage.set_description(description='Human disease', lang='en')
         if wikilink is not None:

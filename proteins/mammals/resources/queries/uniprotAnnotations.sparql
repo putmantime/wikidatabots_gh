@@ -1,0 +1,43 @@
+SELECT  ?uniprot ?plabel ?ecName ?upversion
+(GROUP_CONCAT (DISTINCT ?encodedBy;separator="; ") AS ?encoded_by)
+(GROUP_CONCAT (DISTINCT ?ncbiGene;separator='; ') AS ?gene_id)
+(GROUP_CONCAT (DISTINCT ?alias;separator='; ') AS ?upalias)
+(GROUP_CONCAT (DISTINCT ?pdb;separator='; ') AS ?pdbid)
+(GROUP_CONCAT (DISTINCT ?refseq;separator='; ') AS ?refseqid)
+(GROUP_CONCAT (DISTINCT ?ensP;separator='; ') AS ?ensemblp)
+WHERE
+  { VALUES ?uniprot { <http://purl.uniprot.org/uniprot/$1> }
+    ?uniprot rdfs:label ?plabel .
+    ?uniprot up:version ?upversion .
+    ?uniprot up:encodedBy ?gene .
+    ?gene skos:prefLabel ?encodedBy
+    OPTIONAL
+      { ?uniprot up:alternativeName ?upAlias .
+        ?upAlias up:ecName ?ecName
+      }
+    OPTIONAL
+      { ?uniprot rdfs:seeAlso ?ncbiGene .
+        ?ncbiGene up:database database:GeneID
+      }
+    OPTIONAL
+      { ?uniprot up:alternativeName ?upAlias
+          { ?upAlias up:fullName ?alias}
+        UNION
+          { ?upAlias up:shortName ?alias}
+      }
+    ?uniprot up:version ?upversion
+    OPTIONAL
+      { ?uniprot rdfs:seeAlso ?pdb .
+        ?pdb up:database database:PDB
+      }
+    OPTIONAL
+      { ?uniprot rdfs:seeAlso ?refseq .
+        ?refseq up:database database:RefSeq
+      }
+    OPTIONAL
+      { ?uniprot rdfs:seeAlso ?ensT .
+        ?ensT up:database database:Ensembl .
+        ?ensT up:translatedTo ?ensP
+      }
+  }
+GROUP BY ?upAlias ?uniprot ?encodedBy ?plabel ?ecName ?upversion
