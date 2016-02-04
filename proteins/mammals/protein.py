@@ -36,6 +36,7 @@ import ProteinBoxBot_Core.PBB_Core as PBB_Core
 import ProteinBoxBot_Core.PBB_Debug as PBB_Debug
 import ProteinBoxBot_Core.PBB_login as PBB_login
 import ProteinBoxBot_Core.PBB_settings as PBB_settings
+from SPARQLWrapper import SPARQLWrapper, JSON
 import requests
 import traceback
 from time import gmtime, strftime
@@ -51,7 +52,7 @@ try:
 except ImportError as e:
     import json
 
-#######SPARQL function########################
+
 def SPARQL(url, query, rformat):
     print ("Initialising SPARQL")
     prefixes = open("./resources/queries/prefixes").read()
@@ -67,14 +68,46 @@ def SPARQL(url, query, rformat):
         result = requests.get(query + "&format="+rformat)
         results = result.json()
         return results
-#############################################
+
+def GetWikidataIds(propertyId, wd_species):
+        query = open("resources/queries/getIdInWikidata.sparql").read()
+        query = query.replace("$1", propertyId)
+        query = query.replace("$2", wd_species)
+        return SPARQL("https://query.wikidata.org/bigdata/namespace/wdq/sparql", query, "JSON")
+
+class DomainWikidataIDs(object):
+    def __init__(self, object):
+        """
+        :rtype : basestring
+        """
+        if object == "human":
+            self.taxon_id = 9606
+            self.wd_taxon_id = "Q5"
+            self.en_name = "human"
+            self.fr_name = "humaine"
+            self.nl_name = "menselijk"
+            self.de_name = "Humanes"
+        elif object == "mouse":
+            self.taxon_id = 10090
+            self.wd_taxon_id = "Q83310"
+            self.en_name = "mouse"
+            self.fr_name = "de souris"
+            self.nl_name = "muizen"
+            self.de_name = "Mause"
+        elif object == "rat":
+            self.taxon_id = 10116
+            self.wd_taxon_id = "Q184224"
+            self.en_name = "rat"
+            self.fr_name = "de rat"
+            self.nl_name = "rat"
+            self.de_name = "Ratte"
 
 class Proteins(object):
     def __init__(self, object):
         print("Getting all human proteins from Uniprot...")
         #Obtaining the right query
-        query = open("resources/queries/humanProteins").read()
-      
+        query = open("resources/queries/proteinsByTaxon.sparql").read()
+        query = query.replace("$1",object)
         #Perform the sparql query, if JSON sparqlwrapper is used otherwise, requests.get()
         prot_results = SPARQL(uniprotURL, query, "srj")
 
@@ -85,11 +118,16 @@ class Proteins(object):
             item["label"] = protein["protein_label"]["value"]
             self.uniprot_ids.append(item)
 
+class Wikidata_Proteins(object):
+    def __init__(self, object):
+        print("Getting all proteins from Wikidata...")
+        query = open("resources/queries/WikidataProteins")
+
 class Uniprot_Record(object):
     def __init__(self, object):
         #Contains a $1 variable in the query which can be replaced by a uri / string / int etc of interest
         print (object["id"])
-        query = open("resources/queries/uniprotInformation").read()
+        query = open("resources/queries/uniprotAnnotations.sparql").read()
         query = query.replace("$1",object["id"])
         print (query)
         print ("Getting Uniprot records for a given protein")
@@ -106,22 +144,21 @@ class Go_Annotations_Uniprot(object):
         self.go_terms = SPARQL(uniprotURL,query,"srj")
 
 
-class HumanProteome:
-    def __init__(self):
+class HumanProteome(object):
+    def __init__(self, object):
         self.start = time.time()
         self.logincreds = PBB_login.WDLogin(PBB_settings.getWikiDataUser(), PBB_settings.getWikiDataPassword())
-        uniprotwikidataids = dict()
-        genesymbolwdmapping = dict()
+        self.domain_wd_ids = DomainWikidataIDs(object)
         
-        print('Getting all proteins with a uniprot ID in Wikidata...')
-        inwikidata = PBB_Core.WDItemList("CLAIM[703:5] AND CLAIM[352]", "352")
-        for proteinItem in inwikidata.wditems["props"]["352"]:
-            uniprotwikidataids[str(proteinItem[2])] = proteinItem[0]
+        print('Getting all "+object+" proteins from uniprot...')
+        self.proteins = Proteins(object)
 
-        print('Getting all human genes with a ncbi gene ID in Wikidata...')
-        entrez_wikidata_ids = dict()
-        print("wdq 1")
-        wdqQuery = "CLAIM[703:5] AND CLAIM[351]"
+        print('Getting all "+object+" genes with a ncbi gene ID in Wikidata...')
+        self.entrez_wikidata_ids = GetWikidataIds("P351", DomainWikidataIDs(object).wd_taxon_id)
+
+        print('Getting all "+object+" proteins with a uniprot ID in Wikidata...')
+        self.uniprot_wikidata_ids = GetWikidataIds("P352", DomainWikidataIDs(object).wd_taxon_id)
+
 
         InWikiData = PBB_Core.WDItemList(wdqQuery, wdprop="351")
 

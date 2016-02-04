@@ -1,0 +1,6 @@
+SELECT *
+WHERE
+{
+   ?wdid wdt:$1 ?id .
+   ?wdid wdt:P703 wd:$2 .
+}
