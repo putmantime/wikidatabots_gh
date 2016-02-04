@@ -35,10 +35,13 @@ from datetime import date, datetime, timedelta
 
 
 try:
-    print("Getting human proteins from uniprot")
-    proteome = protein.HumanProteome()
-    #Not sure what you want to achieve here?
-    #print(proteome.protein_count)
+    if len(sys.argv) == 1:
+        print("Please provide one of the following species as argument: human, mouse")
+        print("Example: python ProteinBoxBot_Uniprot_Mammals.py human")
+        sys.exit()
+
+    proteome = protein.HumanProteome(sys.argv[1])
+
 
 except Exception as err:
     print(traceback.format_exc())

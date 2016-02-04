@@ -1,0 +1,8 @@
+SELECT DISTINCT ?protein ?protein_label
+WHERE
+{
+        ?protein a up:Protein .
+        ?protein up:reviewed "true"^^xsd:boolean .
+        ?protein rdfs:label ?protein_label .
+        ?protein up:organism taxonomy:$1 .
+}

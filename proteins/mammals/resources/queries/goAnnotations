@@ -1,0 +1,12 @@
+SELECT DISTINCT ?protein ?go ?goLabel ?parentLabel
+WHERE {
+    VALUES ?protein {<http://purl.uniprot.org/uniprot/$1>}
+    ?protein a up:Protein .
+    ?protein up:classifiedWith ?go .
+    ?go rdfs:label ?goLabel .
+    ?go rdfs:subClassOf* ?parent .
+    ?parent rdfs:label ?parentLabel .
+    optional {?parent rdfs:subClassOf ?grandParent .
+    }
+    FILTER (!bound(?grandParent))
+}
