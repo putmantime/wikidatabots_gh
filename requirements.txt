@@ -4,6 +4,5 @@ simplejson
 urllib3
 rdflib
 python-dateutil
-isodate
 certifi
 
