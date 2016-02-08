@@ -1,5 +1,9 @@
 SPARQLWrapper
 requests
 simplejson
-traceback
+urllib3
+rdflib
+python-dateutil
+isodate
+certifi
 
