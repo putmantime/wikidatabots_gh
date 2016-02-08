@@ -1,7 +1,5 @@
 SPARQLWrapper
 requests
-pandas
-numpy
-matplotlib
 simplejson
+traceback
 
