@@ -174,7 +174,6 @@ class  disease(object):
         refRetrieved = PBB_Core.WDTime(timeStringNow, prop_nr='P813', is_reference=True)
         refRetrieved.overwrite_references = True
         do_reference = [refImported, refRetrieved, refStatedIn]
-
         prep = dict()
         if self.do_id != "DOID:4":
             prep["P279"] = [PBB_Core.WDItemID(value='Q12136', prop_nr='P279', references=[copy.deepcopy(do_reference)], rank=self.rank)]
@@ -257,8 +256,9 @@ class  disease(object):
         refStatedIn = PBB_Core.WDUrl(value="http://www.ebi.ac.uk/miriam/main/collections/MIR:00000233", prop_nr='P854', is_reference=True)
         refStatedIn.overwrite_references = True
 
-        io_reference = [refStatedIn]
-        prep["P1709"].append(PBB_Core.WDUrl(value="http://identifiers.org/doid/"+self.do_id, prop_nr='P1709', references=[copy.deepcopy(io_reference)], rank=self.rank))
+        #io_reference = [refStatedIn]
+        #prep["P1709"].append(PBB_Core.WDUrl(value="http://identifiers.org/doid/"+self.do_id, prop_nr='P1709', references=[copy.deepcopy(io_reference)], rank=self.rank))
+
 
         print(self.wdid)
         data2add = []
@@ -279,17 +279,13 @@ class  disease(object):
              wdPage.set_aliases(aliases=self.synonyms, lang='en', append=True)
         self.wd_json_representation = wdPage.get_wd_json_representation()
         PBB_Debug.prettyPrint(self.wd_json_representation)
-        wdPage.write(self.logincreds)
-        if not os.path.exists('./json_dumps'):
-            os.makedirs('./json_dumps')
-        f = open('./json_dumps/'+self.do_id.replace(":", "_")+'.json', 'w+')
-        pprint.pprint(self.wd_json_representation, stream = f)
-        f.close()
 
-        PBB_Core.WDItemEngine.log('INFO', '{main_data_id}, "{exception_type}", "{message}", {wd_id}, {duration}'.format(
+        if self.rank == "normal":
+            wdPage.write(self.logincreds)
+            PBB_Core.WDItemEngine.log('INFO', '{main_data_id}, "{exception_type}", "{message}", {wd_id}, {duration}'.format(
                         main_data_id=self.do_id,
                         exception_type='',
-                        message=f.name,
+                        message="succesfully added",
                         wd_id=self.wdid,
                         duration=time.time()-self.start
                     ))
