@@ -63,7 +63,7 @@ class genome(object):
         self.content = self.download_genes(self.genomeInfo["name"])
         self.gene_count = self.content["total"]
         self.genes = self.content["hits"]
-        self.logincreds = PBB_login.WDLogin(PBB_settings.getWikiDataUser(), PBB_settings.getWikiDataPassword())
+        self.logincreds = PBB_login.WDLogin(PBB_settings.getWikiDataUser(), os.environ['wikidataApi'])
 
         entrezWikidataIds = dict()
         uniprotwikidataids = dict()
