@@ -35,7 +35,7 @@ import genes.mammals.ProteinBoxBotKnowledge as ProteinBoxBotKnowledge
 import requests
 import copy
 import traceback
-import mygene_info_settings
+
 from time import gmtime, strftime
 import time
 import pprint
@@ -474,6 +474,6 @@ class mammal_gene(object):
 
     def annotate_gene(self):
         # "Get gene annotations from mygene.info"     
-        r = requests.get(mygene_info_settings.getGeneAnnotationsURL() + str(self.entrezgene))
+        r = requests.get("http://mygene.info/v2/gene/" + str(self.entrezgene))
         return r.json()
         # return request.data
