@@ -117,8 +117,7 @@ class genome(object):
         """
         Downloads the latest list of human genes from mygene.info through the URL specified in mygene_info_settings
         """
-        print(mygene_info_settings.getGenesUrl().format(species))
-        r = requests.get(mygene_info_settings.getGenesUrl().format(species))
+        r = requests.get("http://mygene.info/v2/query?q=__all__&species={}&entrezonly=true&size=100000".format(species))
         return r.json()
 
 
@@ -467,7 +466,7 @@ class mammal_gene(object):
         PBB_Core.WDItemEngine.log('INFO', '{main_data_id}, "{exception_type}", "{message}", {wd_id}, {duration}'.format(
                         main_data_id=str(self.entrezgene),
                         exception_type='',
-                        message=f.name,
+                        message="",
                         wd_id=self.wdid,
                         duration=time.time()-self.start
                     ))
