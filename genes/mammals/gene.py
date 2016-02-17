@@ -224,6 +224,7 @@ class mammal_gene(object):
                     self.endpos.append(gene_annotations["genomic_pos"]["end"])
 
         self.encodes = None
+        """
         if "uniprot" in gene_annotations.keys():
             if "Swiss-Prot" in gene_annotations["uniprot"].keys():
                 if isinstance(gene_annotations["uniprot"]["Swiss-Prot"], list):
@@ -232,7 +233,7 @@ class mammal_gene(object):
                         self.encodes.append(uniprot)
                 else:
                     self.encodes = [gene_annotations["uniprot"]["Swiss-Prot"]]
-
+        """
 
         self.chromosomeHg19 = None
         self.startposHg19 = None
@@ -332,12 +333,14 @@ class mammal_gene(object):
                     prep['P704'].append(
                         PBB_Core.WDString(value=ensemblt, prop_nr='P704', references=[copy.deepcopy(gene_reference)]))
 
+        """
         if "encodes" in vars(self):
             if self.encodes != None:
                 prep['P688'] = []
                 for uniprot in self.encodes:
                     if uniprot in self.uniprotwikidataids.keys():
                         prep['P688'].append(PBB_Core.WDItemID(value=self.uniprotwikidataids[uniprot], prop_nr='P688', references=[copy.deepcopy(gene_reference)]))
+        """
 
         if "hgnc" in vars(self):
             if self.hgnc != None:
