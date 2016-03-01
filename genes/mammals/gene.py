@@ -387,6 +387,17 @@ class mammal_gene(object):
                         PBB_Core.WDString(value=str(pos), prop_nr='P645', references=[copy.deepcopy(ensembl_reference)],
                                           qualifiers=[copy.deepcopy(genomeBuildQualifier)]))
 
+        if "strand" in vars(self):
+            if not '' in prep.keys():
+                prep[''] = []
+            if self.strand == -1:
+                prep[''].append(
+                        PBB_Core.WDItemID(value='Q22809711', prop_nr='', references=[copy.deepcopy(gene_reference)]))
+
+            if self.strand == 1:
+                prep[''].append(
+                        PBB_Core.WDItemID(value=, prop_nr='', references=[copy.deepcopy(gene_reference)]))
+
         if "startposHg19" in vars(self):
             if not 'P644' in prep.keys():
                 prep['P644'] = []
