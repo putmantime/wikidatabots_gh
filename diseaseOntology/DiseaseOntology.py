@@ -34,7 +34,6 @@ import ProteinBoxBot_Core.PBB_Core as PBB_Core
 import ProteinBoxBot_Core.PBB_Debug as PBB_Debug
 import xml.etree.cElementTree as ET
 import sys
-import DiseaseOntology_settings
 import requests
 try:
     import simplejson as json
@@ -52,8 +51,10 @@ class diseaseOntology():
         self.start = time.time()
         self.content = ET.fromstring(self.download_disease_ontology())
 
+
         self.logincreds = PBB_login.WDLogin(PBB_settings.getWikiDataUser(), os.environ['wikidataApi'])
         # self.logincreds = PBB_login.WDLogin(PBB_settings.getWikiDataUser(), "sNxvAlNtjQ24")
+
         # self.updateDiseaseOntologyVersion()
 
         # Get all WikiData entries that contain a WikiData ID

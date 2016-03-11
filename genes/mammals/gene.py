@@ -334,7 +334,6 @@ class mammal_gene(object):
                         PBB_Core.WDExternalID(value=ensemblt, prop_nr='P704', references=[copy.deepcopy(gene_reference)]))
 
 
-
         if "hgnc" in vars(self):
             if self.hgnc != None:
                 prep['P354'] = []
