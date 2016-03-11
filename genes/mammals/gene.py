@@ -310,7 +310,7 @@ class mammal_gene(object):
             prep['P353'] = [
                 PBB_Core.WDString(value=self.symbol, prop_nr='P353', references=[copy.deepcopy(gene_reference)])]
         prep['P351'] = [
-            PBB_Core.WDString(value=str(self.entrezgene), prop_nr='P351', references=[copy.deepcopy(gene_reference)])]
+            PBB_Core.WDExternalID(value=str(self.entrezgene), prop_nr='P351', references=[copy.deepcopy(gene_reference)])]
 
         prep['P279'] = [PBB_Core.WDItemID(value='Q7187', prop_nr='P279', references=[copy.deepcopy(gene_reference)])]
         if "type_of_gene" in vars(self):
@@ -324,44 +324,37 @@ class mammal_gene(object):
                 prep['P594'] = []
                 for ensemblg in self.ensembl_gene:
                     prep['P594'].append(
-                        PBB_Core.WDString(value=ensemblg, prop_nr='P594', references=[copy.deepcopy(gene_reference)]))
+                        PBB_Core.WDExternalID(value=ensemblg, prop_nr='P594', references=[copy.deepcopy(gene_reference)]))
 
         if "ensembl_transcript" in vars(self):
             if self.ensembl_transcript != None:
                 prep['P704'] = []
                 for ensemblt in self.ensembl_transcript:
                     prep['P704'].append(
-                        PBB_Core.WDString(value=ensemblt, prop_nr='P704', references=[copy.deepcopy(gene_reference)]))
+                        PBB_Core.WDExternalID(value=ensemblt, prop_nr='P704', references=[copy.deepcopy(gene_reference)]))
 
-        """
-        if "encodes" in vars(self):
-            if self.encodes != None:
-                prep['P688'] = []
-                for uniprot in self.encodes:
-                    if uniprot in self.uniprotwikidataids.keys():
-                        prep['P688'].append(PBB_Core.WDItemID(value=self.uniprotwikidataids[uniprot], prop_nr='P688', references=[copy.deepcopy(gene_reference)]))
-        """
+
 
         if "hgnc" in vars(self):
             if self.hgnc != None:
                 prep['P354'] = []
                 for hugo in self.hgnc:
                     prep['P354'].append(
-                        PBB_Core.WDString(value=hugo, prop_nr='P354', references=[copy.deepcopy(gene_reference)]))
+                        PBB_Core.WDExternalID(value=hugo, prop_nr='P354', references=[copy.deepcopy(gene_reference)]))
 
         if "homologene" in vars(self):
             if self.homologene != None:
                 prep['P593'] = []
                 for ortholog in self.homologene:
                     prep['P593'].append(
-                        PBB_Core.WDString(value=ortholog, prop_nr='P593', references=[copy.deepcopy(gene_reference)]))
+                        PBB_Core.WDExternalID(value=ortholog, prop_nr='P593', references=[copy.deepcopy(gene_reference)]))
 
         if "refseq_rna" in vars(self):
             if self.refseq_rna != None:
                 prep['P639'] = []
                 for refseq in self.refseq_rna:
                     prep['P639'].append(
-                        PBB_Core.WDString(value=refseq, prop_nr='P639', references=[copy.deepcopy(gene_reference)]))
+                        PBB_Core.WDExternalID(value=refseq, prop_nr='P639', references=[copy.deepcopy(gene_reference)]))
 
         if "chromosome" in vars(self):
             prep['P1057'] = []
@@ -419,7 +412,7 @@ class mammal_gene(object):
             prep['P671'] = []
             if self.MGI != None:
                 for mgi in self.MGI:
-                    prep['P671'].append(PBB_Core.WDString(value=mgi, prop_nr='P671',
+                    prep['P671'].append(PBB_Core.WDExternalID(value=mgi, prop_nr='P671',
                                         references=[copy.deepcopy(gene_reference)]))
 
         if "alias" in gene_annotations.keys():
