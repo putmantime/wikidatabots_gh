@@ -35,6 +35,7 @@ import ProteinBoxBot_Core.PBB_Debug as PBB_Debug
 import xml.etree.cElementTree as ET
 import sys
 import requests
+import DiseaseOntology_settings
 try:
     import simplejson as json
 except ImportError as e:
