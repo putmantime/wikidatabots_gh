@@ -8,16 +8,16 @@ This example shows basic document generation functionality.
 """
 
 # begin-doc-include
-<<<<<<< HEAD
+
 from pylatex import Document, Section, Subsection, Command, Tabular, Figure, Package, LongTable
 from pylatex.utils import italic, NoEscape
 import pandas as pd
 import csv
-=======
+
 from pylatex import Document, Section, Subsection, Command, Tabular, Figure, Package, TikZ, Axis, Plot
 from pylatex.utils import italic, NoEscape
 import pandas as pd
->>>>>>> d9eaa64178da0e08144b7ec40640e6fca386c226
+
 import matplotlib.pyplot as plt  # noqa
 
 
@@ -31,10 +31,9 @@ if __name__ == '__main__':
     # Document with `\maketitle` command activated
     doc = Document()
     doc.packages.append(Package('geometry', options=['left=2cm', 'right=2cm']))
-<<<<<<< HEAD
+
     doc.packages.append(Package('pdflscape'))
-=======
->>>>>>> d9eaa64178da0e08144b7ec40640e6fca386c226
+
 
     doc.preamble.append(Command('title', 'Curation report on Diseasebot'))
     doc.preamble.append(Command('author', 'Andra Waagmeester'))
@@ -43,8 +42,8 @@ if __name__ == '__main__':
 
     doc.generate_pdf('basic_maketitle', clean=False)
 
-    #df = pd.read_csv('/tmp/logs/WD_bot_run-2016-02-24_16:10.log', sep=',', quotechar='"', encoding='latin-1', header=None, error_bad_lines=True)
-    df = pd.read_csv('/tmp/logs/test.log', sep=',', engine = 'python', quotechar='"',  header=None, skipinitialspace = True)
+    #df = pd.read_csv('/tmp/logs/WD_bot_run-2016-03-11_17:00.log', sep=',', quotechar='"', encoding='latin-1', header=None, error_bad_lines=True)
+    df = pd.read_csv('/tmp/logs/test.log', sep=',', quotechar='"',  header=None, skipinitialspace = True, error_bad_lines = False)
 
     print(df[0].value_counts())
 
@@ -59,16 +58,15 @@ if __name__ == '__main__':
             table1.add_row(("0", counts.ERROR))
         else:
             table1.add_row((counts.INFO, counts.ERROR))
-=======
+
         table1.add_row((counts.INFO, counts.ERROR))
->>>>>>> d9eaa64178da0e08144b7ec40640e6fca386c226
         table1.add_hline()
         doc.append(table1)
 
     with doc.create(Section('Error types and counts')):
         error_df = df[df[0] == "ERROR"]
         errorType_counts = error_df[3].value_counts()
-<<<<<<< HEAD
+
         print(error_df[3].value_counts())
 
         error_table = Tabular('|l|c|')
@@ -101,7 +99,6 @@ if __name__ == '__main__':
 
 
     with doc.create(Section('Full log file')):
-=======
         errorType_details = error_df[4].value_counts()
         error_table = Tabular('|c|c|')
         error_table.add_hline()
@@ -125,7 +122,7 @@ if __name__ == '__main__':
 
 
     with doc.create(Section('Appendix X: Full log file')):
->>>>>>> d9eaa64178da0e08144b7ec40640e6fca386c226
+
         for row in df.itertuples():
             table2.add_row((row[1], row[2], row[3], row[4], row[5], row[6], row[7]))
             table2.add_hline()
